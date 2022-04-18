@@ -1,6 +1,6 @@
-# bmi706-2022-ps3
+# bmi706-2022-Project
 
-Hello, Ziqi!
+Yuxing Li, Linzi Yu, Yujie Guo, Ziqi Wang
 
 
 ## Requirements
