@@ -5,6 +5,8 @@ import pandas as pd
 import streamlit as st
 
 ### P1.2 ###
+# linzitest
+
 
 @st.cache
 def load_data():
@@ -23,13 +25,16 @@ def load_data():
     )
 
     df = pd.merge(left=cancer_df, right=pop_df, how="left")
-    df["Pop"] = df.groupby(["Country", "Sex", "Age"])["Pop"].fillna(method="bfill")
+    df["Pop"] = df.groupby(["Country", "Sex", "Age"])[
+        "Pop"].fillna(method="bfill")
     df.dropna(inplace=True)
 
-    df = df.groupby(["Country", "Year", "Cancer", "Age", "Sex"]).sum().reset_index()
+    df = df.groupby(["Country", "Year", "Cancer",
+                    "Age", "Sex"]).sum().reset_index()
     df["Rate"] = df["Deaths"] / df["Pop"] * 100_000
 
     return df
+
 
 # Uncomment the next line when finished
 df = load_data()
@@ -41,14 +46,15 @@ st.write("## Age-specific cancer mortality rates")
 
 ### P2.1 ###
 # replace with st.slider
-year = st.slider("Year", min_value = min(df['Year']), max_value = max(df['Year']), value = 2012)
+year = st.slider("Year", min_value=min(
+    df['Year']), max_value=max(df['Year']), value=2012)
 subset = df[df["Year"] == year]
 ### P2.1 ###
 
 
 ### P2.2 ###
 # replace with st.radio
-sex = st.radio("Sex", options = ("M", "F"))
+sex = st.radio("Sex", options=("M", "F"))
 subset = subset[subset["Sex"] == sex]
 ### P2.2 ###
 
@@ -66,7 +72,8 @@ default_countries = [
     "Turkey",
 ]
 
-countries = st.multiselect("Countries", options = default_countries, default = default_countries)
+countries = st.multiselect(
+    "Countries", options=default_countries, default=default_countries)
 
 subset = subset[subset["Country"].isin(countries)]
 ### P2.3 ###
@@ -75,22 +82,22 @@ subset = subset[subset["Country"].isin(countries)]
 ### P2.4 ###
 # replace with st.selectbox
 all_cancer = ['Leukaemia', 'Malignant melanoma of skin',
-       'Malignant neoplasm of bladder', 'Malignant neoplasm of breast',
-       'Malignant neoplasm of cervix uteri',
-       'Malignant neoplasm of colon  rectum and anus',
-       'Malignant neoplasm of larynx',
-       'Malignant neoplasm of lip oral cavity and pharynx',
-       'Malignant neoplasm of liver and intrahepatic bile ducts',
-       'Malignant neoplasm of meninges  brain and other parts of central nervous system',
-       'Malignant neoplasm of oesophagus',
-       'Malignant neoplasm of other and unspecified parts of uterus',
-       'Malignant neoplasm of ovary', 'Malignant neoplasm of pancreas',
-       'Malignant neoplasm of prostate', 'Malignant neoplasm of stomach',
-       'Malignant neoplasm of trachea  bronchus and lung',
-       'Multiple myeloma and malignant plasma cell neoplasms',
-       "Non-Hodgkin's lymphoma", 'Remainder of malignant neoplasms']
+              'Malignant neoplasm of bladder', 'Malignant neoplasm of breast',
+              'Malignant neoplasm of cervix uteri',
+              'Malignant neoplasm of colon  rectum and anus',
+              'Malignant neoplasm of larynx',
+              'Malignant neoplasm of lip oral cavity and pharynx',
+              'Malignant neoplasm of liver and intrahepatic bile ducts',
+              'Malignant neoplasm of meninges  brain and other parts of central nervous system',
+              'Malignant neoplasm of oesophagus',
+              'Malignant neoplasm of other and unspecified parts of uterus',
+              'Malignant neoplasm of ovary', 'Malignant neoplasm of pancreas',
+              'Malignant neoplasm of prostate', 'Malignant neoplasm of stomach',
+              'Malignant neoplasm of trachea  bronchus and lung',
+              'Multiple myeloma and malignant plasma cell neoplasms',
+              "Non-Hodgkin's lymphoma", 'Remainder of malignant neoplasms']
 
-cancer = st.selectbox("Cancer", options = all_cancer)
+cancer = st.selectbox("Cancer", options=all_cancer)
 
 subset = subset[subset["Cancer"] == cancer]
 ### P2.4 ###
@@ -123,21 +130,21 @@ selector = alt.selection_single(
 )
 
 chart_base = alt.Chart(subset
-).properties( 
+                       ).properties(
     width=600,
     height=300
 ).add_selection(
     selector
 )
 
-rate_scale = alt.Scale(type = 'log', domain=[0.01, 1000], clamp = True)
+rate_scale = alt.Scale(type='log', domain=[0.01, 1000], clamp=True)
 
 chart_rate = chart_base.mark_rect().encode(
     x=alt.X("Age", sort=ages),
     y=alt.Y("Country"),
-    color=alt.Color("Rate", scale=rate_scale, title="Mortality rate per 100k" ),
-    tooltip=["Rate"], 
-    opacity = alt.condition(selector, alt.value(1), alt.value(0.2))
+    color=alt.Color("Rate", scale=rate_scale, title="Mortality rate per 100k"),
+    tooltip=["Rate"],
+    opacity=alt.condition(selector, alt.value(1), alt.value(0.2))
 ).properties(
     title=f"{cancer} mortality rates for {'males' if sex == 'M' else 'females'} in {year}",
 )
@@ -159,7 +166,7 @@ if len(countries_in_subset) != len(countries):
 
 chart_pop = chart_base.mark_bar().encode(
     y=alt.Y("Country"),
-    x=alt.X("Pop", title = "Population"),
+    x=alt.X("Pop", title="Population"),
     tooltip=["Pop"],
 ).properties(
     title=f"Population of {'males' if sex == 'M' else 'females'} in the selected countries in {year} for the selected age group",
@@ -168,7 +175,7 @@ chart_pop = chart_base.mark_bar().encode(
 )
 
 chart_link = alt.vconcat(chart_rate, chart_pop
-).resolve_scale(
+                         ).resolve_scale(
     color='independent'
 )
 
