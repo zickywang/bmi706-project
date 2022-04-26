@@ -1,6 +1,6 @@
 # bmi706-2022-Project
 
-Yuxing Li, Linzi Yu, Yujie Guo, Ziqi Wang
+Luna Li, Linzi Yu, Yujie Guo, Ziqi Wang
 
 
 ## Requirements
