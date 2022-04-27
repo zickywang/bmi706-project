@@ -5,7 +5,7 @@ import pandas as pd
 import streamlit as st
 
 ### P1.2 ###
-# linzitest-1
+# linzitest
 
 
 @st.cache
