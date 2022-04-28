@@ -14,7 +14,7 @@ def load_data():
     # Move this code into `load_data` function
     covid_df = pd.read_csv(
         "https://covid.ourworldindata.org/data/owid-covid-data.csv")
-    # pop_df = pd.read_csv("https://raw.githubusercontent.com/hms-dbmi/bmi706-2022/main/cancer_data/population.csv").melt(  # type: ignore
+    # pop_df = pd.re1ad_csv("https://raw.githubusercontent.com/hms-dbmi/bmi706-2022/main/cancer_data/population.csv").melt(  # type: ignore
     #     id_vars=["Country", "Year", "Sex"],
     #     var_name="Age",
     #     value_name="Pop",
