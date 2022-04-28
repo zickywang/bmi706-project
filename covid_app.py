@@ -15,10 +15,9 @@ def load_data():
 # Uncomment the next line when finished
 df = load_data()
 
-### P1.2 ###
+### Title of G3 ###
 
-
-st.write("# COVID-19 data")
+st.write("# National Conditions and Covid Statistics across Different Countries")
 
 ### P2.1 ###
 # replace with st.slider
