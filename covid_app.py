@@ -28,7 +28,7 @@ cov_stats = [
     'Deaths'
 ]
 
-selected_stat = st.radio("Covid Statistics", options=cov_stats, default = 'New Cases')
+selected_stat = st.radio("Covid Statistics", options=cov_stats)
 
 cov_map = {
     'New Cases':'new_cases_per_million',
