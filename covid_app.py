@@ -38,11 +38,11 @@ cov_map = {
 }
 
 ### Slider for selection of date range ###
-selected_date = st.slider("Date", min_value=min(df['date']), max_value=max(
-    df['date']), value=datetime.date(2021, 1, 1), format="YYYY-MMM-DD")
-selected_date = str(selected_date)
+start_date, end_date = st.select_slider("Date", min_value=min(df['date']), max_value=max(
+    df['date']), value=(datetime.date(2021, 1, 1), max(
+    df['date'])), format="YYYY-MMM-DD")
 
-df = df.loc[df['date'] == selected_date]
+df = df.loc[start_date < df['date'] < end_date]
 
 ### Dropdown for Countries ###
 default_countries = [
@@ -60,7 +60,6 @@ default_countries = [
 countries = st.multiselect(
     "Countries", options=df["location"].unique(), default=default_countries)
 
-
 df = df[df["location"].isin(countries)]
 
 ### Plot 1: map ###
@@ -70,7 +69,13 @@ df = df[df["location"].isin(countries)]
 # Plot2 Headline #
 st.write("Daily {} per Million People across Countries".format(selected_stat))
 
-
+base = alt.Chart(df, width=600, height=400,
+ ).mark_line().encode(
+    x='date:O',
+    y='cov_map[selected_stat]:Q',
+    color='location:N',
+    tooltip = ['cov_map[selected_stat]:Q', 'location:N']
+)
 
 
 ### Plot 3: bar chart ###
