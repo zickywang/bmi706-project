@@ -37,6 +37,7 @@ cov_map = {
     'ICU Admissions':'weekly_icu_admissions_per_million',
     'Deaths':'new_deaths_per_million'
 }
+statistics = cov_map[selected_stat]
 
 ### Slider for selection of date range ###
 start_date, end_date = st.slider("Date", min(df['date']), max(df['date']), 
@@ -72,7 +73,7 @@ st.write("Daily {} per Million People across Countries".format(selected_stat))
 base = alt.Chart(df, width=600, height=400,
  ).mark_line().encode(
     x='date:O',
-    y='cov_map[selected_stat]:Q',
+    y=':Q',
     color='location:N',
     tooltip = ['cov_map[selected_stat]:Q', 'location:N']
 )
