@@ -4,6 +4,7 @@ import altair as alt
 import pandas as pd
 import streamlit as st
 import datetime
+from datetime import time
 
 @st.cache
 def load_data():
@@ -38,7 +39,7 @@ cov_map = {
 }
 
 ### Slider for selection of date range ###
-start_date, end_date = st.select_slider("Date", min_value=min(df['date']), max_value=max(
+start_date, end_date = st.slider("Date", min_value=min(df['date']), max_value=max(
     df['date']), value=(datetime.date(2021, 1, 1), max(
     df['date'])), format="YYYY-MMM-DD")
 
