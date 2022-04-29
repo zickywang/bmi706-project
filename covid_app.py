@@ -21,6 +21,6 @@ st.write("### Source: Our World in Data")
 
 ### Plot 1: map ###
 
-### Plot 2 ###
+### Plot 2: line chart ###
 
 ### Plot 3: bar chart ###
