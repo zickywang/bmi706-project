@@ -19,7 +19,7 @@ df = load_data()
 st.write("# COVID-19 Data monitor")
 st.write("### Source: Our World in Data")
 
-### Plot 1 ###
+### Plot 1: map ###
 
 ### Plot 2 ###
 
