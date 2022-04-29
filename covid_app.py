@@ -10,7 +10,7 @@ from datetime import time
 def load_data():
     covid_df = pd.read_csv(
         "https://covid.ourworldindata.org/data/owid-covid-data.csv")
-    covid_df['date'] = pd.to_datetime(covid_df['date'])
+    covid_df['date'] = pd.to_datetime(covid_df['date']).dt.date
     return covid_df
 
 
@@ -39,11 +39,10 @@ cov_map = {
 }
 
 ### Slider for selection of date range ###
-start_date, end_date = st.slider("Date", min_value=min(df['date']), max_value=max(
-    df['date']), value=(datetime.date(2021, 1, 1), max(
-    df['date'])), format="YYYY-MMM-DD")
+start_date, end_date = st.slider("Date", min(df['date']), max(df['date']), 
+    (datetime.date(2021, 1, 1), max(df['date'])), format="YYYY-MMM-DD")
 
-df = df.loc[start_date < df['date'] < end_date]
+df = df[(df['date'] > start_date) & (df['date'] < end_date)]
 
 ### Dropdown for Countries ###
 default_countries = [
