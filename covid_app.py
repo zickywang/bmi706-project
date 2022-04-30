@@ -60,7 +60,7 @@ df = df[df["location"].isin(countries)]
 
 ### Plot 2: line chart ###
 
-# Plot2 Headline #
+# Plot2 Headline 
 st.write("Daily {} per Million People across Countries".format(selected_stat))
 
 
@@ -75,6 +75,7 @@ selectors = alt.Chart(df).mark_point().encode(
     nearest
 )
 
+# base line plot
 if selected_stat == 'New Cases':
     base = alt.Chart(df
     ).mark_line().encode(
@@ -131,10 +132,12 @@ rules = alt.Chart(df).mark_rule(color='gray').encode(
     nearest
 )
 
+# wrap them together
 g2 = alt.layer(
     base, selectors, points, rules, text
 ).properties(
     width=800, height=600
 )
 g2
+
 ### Plot 3: bar chart ###
