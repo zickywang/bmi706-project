@@ -31,19 +31,12 @@ cov_stats = [
 
 selected_stat = st.radio("Covid Statistics", options=cov_stats)
 
-cov_map = {
-    'New Cases':'new_cases_per_million',
-    'Hospitalizations':'hosp_patients_per_million',
-    'ICU Admissions':'weekly_icu_admissions_per_million',
-    'Deaths':'new_deaths_per_million'
-}
-statistics = cov_map[selected_stat]
-
 ### Slider for selection of date range ###
 start_date, end_date = st.slider("Date", min(df['date']), max(df['date']), 
     (datetime.date(2021, 1, 1), max(df['date'])), format="YYYY-MMM-DD")
 
 df = df[(df['date'] > start_date) & (df['date'] < end_date)]
+df["date"] = pd.to_datetime(df["date"])
 
 ### Dropdown for Countries ###
 default_countries = [
@@ -70,13 +63,78 @@ df = df[df["location"].isin(countries)]
 # Plot2 Headline #
 st.write("Daily {} per Million People across Countries".format(selected_stat))
 
-base = alt.Chart(df, width=600, height=400,
- ).mark_line().encode(
-    x='date:O',
-    y=':Q',
-    color='location:N',
-    tooltip = ['cov_map[selected_stat]:Q', 'location:N']
+
+# multi-line tooltip
+nearest = alt.selection(type='single', nearest=True, on='mouseover',
+                        fields=['date'], empty='none')
+
+selectors = alt.Chart(df).mark_point().encode(
+    x='date',
+    opacity=alt.value(0),
+).add_selection(
+    nearest
 )
 
+if selected_stat == 'New Cases':
+    base = alt.Chart(df
+    ).mark_line().encode(
+        x='date',
+        y='new_cases_smoothed_per_million',
+        color='location',
+        tooltip = ['new_cases_smoothed_per_million', 'location']
+    )
+    text = base.mark_text(align='left', dx=5, dy=-5).encode(
+    text=alt.condition(nearest, 'new_cases_smoothed_per_million', alt.value(' '))
+    )
+elif selected_stat == 'Hospitalizations':
+    base = alt.Chart(df
+    ).mark_line().encode(
+        x='date',
+        y='hosp_patients_per_million',
+        color='location',
+        tooltip = ['hosp_patients_per_million', 'location']
+    )
+    text = base.mark_text(align='left', dx=5, dy=-5).encode(
+    text=alt.condition(nearest, 'hosp_patients_per_million', alt.value(' '))
+    )
+elif selected_stat == 'ICU Admissions':
+    base = alt.Chart(df
+    ).mark_line().encode(
+        x='date',
+        y='weekly_icu_admissions_per_million',
+        color='location',
+        tooltip = ['weekly_icu_admissions_per_million', 'location']
+    )
+    text = base.mark_text(align='left', dx=5, dy=-5).encode(
+    text=alt.condition(nearest, 'weekly_icu_admissions_per_million', alt.value(' '))
+    )
+else:
+    base = alt.Chart(df
+    ).mark_line().encode(
+        x='date',
+        y='new_deaths_smoothed_per_million',
+        color='location',
+        tooltip = ['new_deaths_smoothed_per_million', 'location']
+    )
+    text = base.mark_text(align='left', dx=5, dy=-5).encode(
+    text=alt.condition(nearest, 'new_deaths_smoothed_per_million', alt.value(' '))
+    )
 
+
+points = base.mark_point().encode(
+    opacity=alt.condition(nearest, alt.value(1), alt.value(0))
+)
+
+rules = alt.Chart(df).mark_rule(color='gray').encode(
+    x='date',
+).transform_filter(
+    nearest
+)
+
+g2 = alt.layer(
+    base, selectors, points, rules, text
+).properties(
+    width=800, height=600
+)
+g2
 ### Plot 3: bar chart ###
