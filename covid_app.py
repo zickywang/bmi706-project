@@ -10,7 +10,13 @@ import datetime
 def load_data():
     covid_df = pd.read_csv(
         "https://covid.ourworldindata.org/data/owid-covid-data.csv")
+    
     covid_df['date'] = pd.to_datetime(covid_df['date'])
+
+    # impute NA values
+    covid_df = covid_df.groupby(['location']).fillna(method="ffill").reset_index()
+    covid_df = covid_df.fillna(0)
+
     return covid_df
 
 
@@ -46,7 +52,7 @@ st.write("# National Conditions and Covid Statistics across Different Countries"
 
 
 ### Slider for selection of data range ###
-selected_date = st.slider("Select a date for culmulative statistics", min_value=min(df['date']), max_value=max(
+selected_date = st.slider("Select a date for culmulative statistics since 2020-01-01", min_value=min(df['date']), max_value=max(
     df['date']), value=datetime.date(2021, 1, 1), format="YYYY-MMM-DD")
 selected_date = str(selected_date)
 
@@ -56,20 +62,31 @@ df_g3 = df.loc[df['date'] == selected_date]
 
 ### Dropdown for National Conditions ###
 default_conditions = [
-    'total_vaccinations_per_hundred',
+    'gdp_per_capita',  
+    'people_vaccinated_per_hundred',
     'stringency_index'
 ]
 condition_options = [
-    'gdp_per_capita',  # 'GDP per capita'
-    'population_density',
+    'gdp_per_capita',  
     'extreme_poverty',
-    'handwashing_facilities',  # Handwash Facilities
-    'total_vaccinations_per_hundred',    # 'Vaccination Rate'
-    'stringency_index'
+    'people_vaccinated_per_hundred',    
+    'people_fully_vaccinated_per_hundred',
+    'stringency_index',
+    'population_density',
+    'median_age',
+    'aged_65_older',
+    'aged_70_older',
+    'cardiovasc_death_rate',
+    'diabetes_prevalence',
+    'female_smokers',
+    'male_smokers',
+    'handwashing_facilities',
+    'hospital_beds_per_thousand',
+    'life_expectancy', 
+    'human_development_index',
 ]
 conditions = st.multiselect(
     "Select National Conditions", options=condition_options, default=default_conditions)
-
 
 #############
 
@@ -95,7 +112,6 @@ countries = st.multiselect(
 
 df_g3 = df_g3[df_g3["location"].isin(countries)]
 
-
 #############
 
 
@@ -103,16 +119,16 @@ df_g3 = df_g3[df_g3["location"].isin(countries)]
 # Header for G3
 st.write("National Conditions and Culmulative {} per Million People across Countries from 2020-01-01 to {}".format(selected_stat, selected_date))
 
-# if selected_stat == "New Cases":
+if selected_stat == "New Cases":
+    g3_columns = conditions.append('total_cases_per_million')
 
+    bar_chart = alt.Chart(df_g3).mark_bar().encode(
+        x=alt.X("conditions:Q", stack=True, title="conditions"),
+        y=alt.Y("location"),
+    ).properties(
+        width=440,
+        title=f"barchart",
+    )
 
-
-bar_chart = alt.Chart(df_g3).mark_bar().encode(
-    x=alt.X("conditions:Q", stack=True, title="conditions"),
-    y=alt.Y("location"),
-).properties(
-    width=440,
-    title=f"barchart",
-)
 
 st.altair_chart(bar_chart, use_container_width=True)
