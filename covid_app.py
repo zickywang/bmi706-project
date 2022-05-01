@@ -20,51 +20,6 @@ def load_data():
 
 df = load_data()
 
-#################################################
-# Modify df to add longitude and latitude
-# declare an empty list to store latitude and longitude of values country column
-longitude = []
-latitude = []
-   
-# function to find the coordinate of a given country 
-def findGeocode(country):
-       
-    # try and catch is used to overcome
-    # the exception thrown by geolocator
-    # using geocodertimedout  
-    try:
-          
-        # Specify the user_agent as your
-        # app name it should not be none
-        geolocator = Nominatim(user_agent="covid_app")
-          
-        return geolocator.geocode(country)
-      
-    except GeocoderTimedOut:
-          
-        return findGeocode(country)    
-  
-# each value from country column will be fetched and sent to function find_geocode   
-for i in (df["location"]):
-      
-    if findGeocode(i) != None:
-           
-        loc = findGeocode(i)
-          
-        # coordinates returned from function is stored into two separate list
-        latitude.append(loc.latitude)
-        longitude.append(loc.longitude)
-       
-    # if coordinate for a country not found, insert "NaN" indicating missing value 
-    else:
-        latitude.append(np.nan)
-        longitude.append(np.nan)
-
-# now add this column to dataframe
-df["Longitude"] = longitude
-df["Latitude"] = latitude
-
-
 # Headlines #
 st.write("# COVID-19 Data monitor")
 st.write("### Source: Our World in Data")
@@ -97,12 +52,66 @@ countries = st.multiselect(
 
 df = df[df["location"].isin(countries)]
 
+### Slider for selection of date range ###
+# Note for ziqi and linzi, this is not the slider for a specific day
+start_date, end_date = st.slider("Date", min(df['date']), max(df['date']), 
+    (datetime.date(2021, 1, 1), datetime.date(2021, 12, 30)), format="YYYY-MMM-DD")
+
+df = df[(df['date'] > start_date) & (df['date'] < end_date)]
+df["date"] = pd.to_datetime(df["date"])
+
+#################################################
+# Modify df to add longitude and latitude
+# declare an empty list to store latitude and longitude of values country column
+longitude = dict()
+latitude = dict()
+   
+# function to find the coordinate of a given country 
+def findGeocode(country):
+       
+    # try and catch is used to overcome
+    # the exception thrown by geolocator
+    # using geocodertimedout  
+    try:
+          
+        # Specify the user_agent as your
+        # app name it should not be none
+        geolocator = Nominatim(user_agent='covid_app')
+          
+        return geolocator.geocode(country)
+      
+    except GeocoderTimedOut:
+          
+        return findGeocode(country)    
+  
+# each value from country column will be fetched and sent to function find_geocode   
+for i in (countries):
+      
+    if findGeocode(i) != None:
+           
+        loc = findGeocode(i)
+          
+        # coordinates returned from function is stored into two separate list
+        latitude[i] = loc.latitude
+        longitude[i] = loc.longitude
+       
+    # if coordinate for a country not found, insert "NaN" indicating missing value 
+    else:
+        latitude[i] = np.nan
+        longitude[i] = np.nan
+
+# now add this column to dataframe
+conditions1 = [df['location']==i for i in longitude.keys()]
+conditions2 = [df['location']==i for i in latitude.keys()]
+df["Longitude"] = np.select(conditions1,longitude.values())
+df["Latitude"] = np.select(conditions2,latitude.values())
+
 #################################################
 ### Plot 1: map ###
 
 #################################################
 ### SELECTBOX widgets
-st.write("Daily {} per Million People across Countries".format(selected_stat))
+st.write("THE map")
 
 metrics =['total_cases_per_million','new_cases_smoothed_per_million','total_deaths_per_million','new_deaths_smoothed_per_million', 
 'icu_patients_per_million', 'hosp_patients_per_million', 'weekly_icu_admissions_per_million', 'weekly_hosp_admissions_per_million', 
@@ -117,8 +126,8 @@ if cols in metrics:
 #################################################
 ## MAP
 
-# Variable for date picker, default to Jan 1st 2020
-date = datetime.date(2020,1,1)
+# Variable for date picker, default to Jan 1st 2021
+date = datetime.date(2021,1,1)
 
 # Set viewport for the deckgl map
 view = pdk.ViewState(latitude=0, longitude=0, zoom=0.2,)
@@ -156,9 +165,9 @@ subheading = st.subheader("")
 map = st.pydeck_chart(r)
 
 # Update the maps and the subheading each day for from beginning to end
-for i in range(0, 820, 10):
-    # Increment day by 10
-    date += datetime.timedelta(days=10)
+for i in range(0, 365, 1):
+    # Increment day by 1
+    date += datetime.timedelta(days=1)
 
     # Update data in map layers
     covidLayer.data = df[df['date'] == date.isoformat()]
@@ -260,9 +269,3 @@ g2
 #################################################
 ### Plot 3: bar chart ###
 
-### Slider for selection of date range ###
-start_date, end_date = st.slider("Date", min(df['date']), max(df['date']), 
-    (datetime.date(2021, 1, 1), max(df['date'])), format="YYYY-MMM-DD")
-
-df = df[(df['date'] > start_date) & (df['date'] < end_date)]
-df["date"] = pd.to_datetime(df["date"])
