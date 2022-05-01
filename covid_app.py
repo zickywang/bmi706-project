@@ -17,6 +17,17 @@ def load_data():
 # Uncomment the next line when finished
 df = load_data()
 
+### Radio selector for selection of COVID statistics ###
+cov_stats = [
+    'New Cases',
+    'Hospitalizations',
+    'ICU Admissions'
+    'Deaths'
+]
+
+selected_stat = st.radio("Covid Statistics", options=cov_stats)
+#############
+
 ### Title of G3 ###
 st.write("# National Conditions and Covid Statistics across Different Countries")
 #############
@@ -31,19 +42,15 @@ stats_options = [
 ]
 covid_stats = st.selectbox(
     "Covid statistics", options=stats_options)
+#############
 
+
+### Slider for selection of data range ###
 selected_date = st.slider("Date", min_value=min(df['date']), max_value=max(
     df['date']), value=datetime.date(2021, 1, 1), format="YYYY-MMM-DD")
 selected_date = str(selected_date)
 
 df_g3 = df.loc[df['date'] == selected_date]
-#############
-
-
-### Slider for selection of data range ###
-# replace with st.slider
-
-
 #############
 
 
