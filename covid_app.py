@@ -5,6 +5,7 @@ import pandas as pd
 import streamlit as st
 import datetime
 from datetime import time
+import pydeck as pdk
 
 @st.cache
 def load_data():
@@ -56,8 +57,83 @@ countries = st.multiselect(
 
 df = df[df["location"].isin(countries)]
 
+#################################################
 ### Plot 1: map ###
 
+#################################################
+### SELECTBOX widgets
+metrics =['total_cases_per_million','new_cases_smoothed_per_million','total_deaths_per_million','new_deaths_smoothed_per_million', 
+'icu_patients_per_million', 'hosp_patients_per_million', 'weekly_icu_admissions_per_million', 'weekly_hosp_admissions_per_million', 
+'total_tests_per_thousand', 'new_tests_smoothed_per_thousand']
+
+cols = st.selectbox('Covid metric to view', metrics)
+
+# let's ask the user which column should be used as Index
+if cols in metrics:   
+    metric_to_show_in_covid_Layer = cols 
+
+#################################################
+## MAP
+
+# Variable for date picker, default to Jan 1st 2020
+date = datetime.date(2020,1,1)
+
+# Set viewport for the deckgl map
+view = pdk.ViewState(latitude=0, longitude=0, zoom=0.2,)
+
+# Create the scatter plot layer
+covidLayer = pdk.Layer(
+        "ScatterplotLayer",
+        data=df,
+        pickable=False,
+        opacity=0.3,
+        stroked=True,
+        filled=True,
+        radius_scale=10,
+        radius_min_pixels=5,
+        radius_max_pixels=60,
+        line_width_min_pixels=1,
+        get_position=["Longitude", "Latitude"],
+        get_radius=metric_to_show_in_covid_Layer,
+        get_fill_color=[252, 136, 3],
+        get_line_color=[255,0,0],
+        tooltip="test test",
+    )
+
+# Create the deck.gl map
+r = pdk.Deck(
+    layers=[covidLayer],
+    initial_view_state=view,
+    map_style="mapbox://styles/mapbox/light-v10",
+)
+
+# Create a subheading to display current date
+subheading = st.subheader("")
+
+# Render the deck.gl map in the Streamlit app as a Pydeck chart 
+map = st.pydeck_chart(r)
+
+# Update the maps and the subheading each day for 90 days
+for i in range(0, 120, 1):
+    # Increment day by 1
+    date += datetime.timedelta(days=1)
+
+    # Update data in map layers
+    covidLayer.data = df[df['date'] == date.isoformat()]
+
+    # Update the deck.gl map
+    r.update()
+
+    # Render the map
+    map.pydeck_chart(r)
+
+    # Update the heading with current date
+    subheading.subheader("%s on : %s" % (metric_to_show_in_covid_Layer, date.strftime("%B %d, %Y")))
+    
+    # wait 0.1 second before go onto next day
+    time.sleep(0.05)
+
+#################################################
 ### Plot 2: line chart ###
 
 # Plot2 Headline 
@@ -121,7 +197,6 @@ else:
     text=alt.condition(nearest, 'new_deaths_smoothed_per_million', alt.value(' '))
     )
 
-
 points = base.mark_point().encode(
     opacity=alt.condition(nearest, alt.value(1), alt.value(0))
 )
@@ -140,4 +215,5 @@ g2 = alt.layer(
 )
 g2
 
+#################################################
 ### Plot 3: bar chart ###
