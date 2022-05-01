@@ -14,7 +14,7 @@ def load_data():
     covid_df['date'] = pd.to_datetime(covid_df['date'])
 
     # impute NA values
-    covid_df = covid_df.groupby(['location']).fillna(method="ffill").reset_index()
+    covid_df.iloc[:,4:] = covid_df.groupby(['location']).fillna(method="ffill").iloc[:,3:]
     covid_df = covid_df.fillna(0)
 
     return covid_df
@@ -102,7 +102,6 @@ default_countries = [
     'Taiwan',
     "Iceland",
     "Spain",
-
 ]
 countries = st.multiselect(
     "Select Countries", options=df["location"].unique(), default=default_countries)
@@ -120,7 +119,8 @@ df_g3 = df_g3[df_g3["location"].isin(countries)]
 st.write("National Conditions and Culmulative {} per Million People across Countries from 2020-01-01 to {}".format(selected_stat, selected_date))
 
 if selected_stat == "New Cases":
-    g3_columns = conditions.append('total_cases_per_million')
+    g3_columns = conditions.copy()
+    g3_columns.append('total_cases_per_million')
 
     bar_chart = alt.Chart(df_g3).mark_bar().encode(
         x=alt.X("conditions:Q", stack=True, title="conditions"),
