@@ -21,7 +21,7 @@ df = load_data()
 cov_stats = [
     'New Cases',
     'Hospitalizations',
-    'ICU Admissions'
+    'ICU Admissions',
     'Deaths'
 ]
 
@@ -32,21 +32,21 @@ selected_stat = st.radio("Covid Statistics", options=cov_stats)
 st.write("# National Conditions and Covid Statistics across Different Countries")
 #############
 
-### Filter for COVID Statistics ###
-# total deaths per million
-stats_options = [
-    'new_cases_per_million',
-    'total_deaths_per_million',
-    'hosp_patients_per_million',
-    'icu_patients_per_million'
-]
-covid_stats = st.selectbox(
-    "Covid statistics", options=stats_options)
-#############
+# ### Filter for COVID Statistics ###
+# # total deaths per million
+# stats_options = [
+#     'new_cases_per_million',
+#     'total_deaths_per_million',
+#     'hosp_patients_per_million',
+#     'icu_patients_per_million'
+# ]
+# covid_stats = st.selectbox(
+#     "Covid statistics", options=stats_options)
+# #############
 
 
 ### Slider for selection of data range ###
-selected_date = st.slider("Date", min_value=min(df['date']), max_value=max(
+selected_date = st.slider("Select a date for culmulative statistics", min_value=min(df['date']), max_value=max(
     df['date']), value=datetime.date(2021, 1, 1), format="YYYY-MMM-DD")
 selected_date = str(selected_date)
 
@@ -100,6 +100,13 @@ df_g3 = df_g3[df_g3["location"].isin(countries)]
 
 
 ### Graph 3: Bar chart across different countries ###
+# Header for G3
+st.write("National Conditions and Culmulative {} per Million People across Countries from 2020-01-01 to {}".format(selected_stat, selected_date))
+
+# if selected_stat == "New Cases":
+
+
+
 bar_chart = alt.Chart(df_g3).mark_bar().encode(
     x=alt.X("conditions:Q", stack=True, title="conditions"),
     y=alt.Y("location"),
