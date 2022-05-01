@@ -26,7 +26,7 @@ st.write("# National Conditions and Covid Statistics across Different Countries"
 stats_options = [
     'new_cases_per_million',
     'total_deaths_per_million',
-    'hosp_patients_per_million'
+    'hosp_patients_per_million',
     'icu_patients_per_million'
 ]
 covid_stats = st.selectbox(
@@ -61,7 +61,7 @@ condition_options = [
     'stringency_index'
 ]
 conditions = st.multiselect(
-    "National Conditions", options=condition_options, default=default_conditions)
+    "Select National Conditions", options=condition_options, default=default_conditions)
 
 
 #############
@@ -81,7 +81,7 @@ default_countries = [
 
 ]
 countries = st.multiselect(
-    "Countries", options=df["location"].unique(), default=default_countries)
+    "Select Countries", options=df["location"].unique(), default=default_countries)
 
 # should be removed later:
 # df_g3 = df[df["date"] == '2022-04-26']
@@ -93,4 +93,12 @@ df_g3 = df_g3[df_g3["location"].isin(countries)]
 
 
 ### Graph 3: Bar chart across different countries ###
-# bar_chart = alt.Chart(df_g3).mark_bar().encode()
+bar_chart = alt.Chart(df_g3).mark_bar().encode(
+    x=alt.X("conditions:Q", stack=True, title="conditions"),
+    y=alt.Y("location"),
+).properties(
+    width=440,
+    title=f"barchart",
+)
+
+st.altair_chart(bar_chart, use_container_width=True)
