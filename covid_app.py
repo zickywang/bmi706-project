@@ -10,11 +10,12 @@ import datetime
 def load_data():
     covid_df = pd.read_csv(
         "https://covid.ourworldindata.org/data/owid-covid-data.csv")
-    
+
     covid_df['date'] = pd.to_datetime(covid_df['date'])
 
     # impute NA values
-    covid_df.iloc[:,4:] = covid_df.groupby(['location']).fillna(method="ffill").iloc[:,3:]
+    covid_df.iloc[:, 4:] = covid_df.groupby(
+        ['location']).fillna(method="ffill").iloc[:, 3:]
     covid_df = covid_df.fillna(0)
 
     return covid_df
@@ -62,14 +63,14 @@ df_g3 = df.loc[df['date'] == selected_date]
 
 ### Dropdown for National Conditions ###
 default_conditions = [
-    'gdp_per_capita',  
+    'gdp_per_capita',
     'people_vaccinated_per_hundred',
     'stringency_index'
 ]
 condition_options = [
-    'gdp_per_capita',  
+    'gdp_per_capita',
     'extreme_poverty',
-    'people_vaccinated_per_hundred',    
+    'people_vaccinated_per_hundred',
     'people_fully_vaccinated_per_hundred',
     'stringency_index',
     'population_density',
@@ -82,7 +83,7 @@ condition_options = [
     'male_smokers',
     'handwashing_facilities',
     'hospital_beds_per_thousand',
-    'life_expectancy', 
+    'life_expectancy',
     'human_development_index',
 ]
 conditions = st.multiselect(
@@ -92,19 +93,46 @@ conditions = st.multiselect(
 
 
 ### Dropdown for Countries ###
-default_countries = [
+option_countries = [
+    'Isreal',
+    'Italy'
     'France',
     'United Kingdom',
     'United States',
     'China',
+    'Japan',
+    'South Korea',
     "Austria",
     "Germany",
-    'Taiwan',
-    "Iceland",
     "Spain",
+    'Australia',
+    'Central African Republic',
+    'Burundi',
+    'Liberia',
+    'Democratic Republic of Congo',
+    'Niger',
+    'Malawi',
+    'Mozambique',
+    'Sierra Leone',
+    'Comosros',
+    'Madagascar',
+    'Togo',
+    'Yemen',
+    'Yemen',
+    'Eritrea',
+    'Guinea-Bissau'
 ]
+default_countries = [
+    'Isreal',
+    'Italy'
+    'France',
+    'United Kingdom',
+    'United States',
+    'China',
+]
+covid_countries = df["location"].unique()
 countries = st.multiselect(
-    "Select Countries", options=df["location"].unique(), default=default_countries)
+    "Select Countries", options=option_countries, default=default_countries)
 
 # should be removed later:
 # df_g3 = df[df["date"] == '2022-04-26']
