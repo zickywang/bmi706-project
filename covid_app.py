@@ -2,10 +2,14 @@ from ssl import Options
 from turtle import title
 import altair as alt
 import pandas as pd
+import numpy as np
 import streamlit as st
 import datetime
 from datetime import time
+import time as time2
 import pydeck as pdk
+from geopy.exc import GeocoderTimedOut
+from geopy.geocoders import Nominatim
 
 @st.cache
 def load_data():
@@ -14,9 +18,52 @@ def load_data():
     covid_df['date'] = pd.to_datetime(covid_df['date']).dt.date
     return covid_df
 
-
-# Uncomment the next line when finished
 df = load_data()
+
+#################################################
+# Modify df to add longitude and latitude
+# declare an empty list to store latitude and longitude of values country column
+longitude = []
+latitude = []
+   
+# function to find the coordinate of a given country 
+def findGeocode(country):
+       
+    # try and catch is used to overcome
+    # the exception thrown by geolocator
+    # using geocodertimedout  
+    try:
+          
+        # Specify the user_agent as your
+        # app name it should not be none
+        geolocator = Nominatim(user_agent="covid_app")
+          
+        return geolocator.geocode(country)
+      
+    except GeocoderTimedOut:
+          
+        return findGeocode(country)    
+  
+# each value from country column will be fetched and sent to function find_geocode   
+for i in (df["location"]):
+      
+    if findGeocode(i) != None:
+           
+        loc = findGeocode(i)
+          
+        # coordinates returned from function is stored into two separate list
+        latitude.append(loc.latitude)
+        longitude.append(loc.longitude)
+       
+    # if coordinate for a country not found, insert "NaN" indicating missing value 
+    else:
+        latitude.append(np.nan)
+        longitude.append(np.nan)
+
+# now add this column to dataframe
+df["Longitude"] = longitude
+df["Latitude"] = latitude
+
 
 # Headlines #
 st.write("# COVID-19 Data monitor")
@@ -31,13 +78,6 @@ cov_stats = [
 ]
 
 selected_stat = st.radio("Covid Statistics", options=cov_stats)
-
-### Slider for selection of date range ###
-start_date, end_date = st.slider("Date", min(df['date']), max(df['date']), 
-    (datetime.date(2021, 1, 1), max(df['date'])), format="YYYY-MMM-DD")
-
-df = df[(df['date'] > start_date) & (df['date'] < end_date)]
-df["date"] = pd.to_datetime(df["date"])
 
 ### Dropdown for Countries ###
 default_countries = [
@@ -62,6 +102,8 @@ df = df[df["location"].isin(countries)]
 
 #################################################
 ### SELECTBOX widgets
+st.write("Daily {} per Million People across Countries".format(selected_stat))
+
 metrics =['total_cases_per_million','new_cases_smoothed_per_million','total_deaths_per_million','new_deaths_smoothed_per_million', 
 'icu_patients_per_million', 'hosp_patients_per_million', 'weekly_icu_admissions_per_million', 'weekly_hosp_admissions_per_million', 
 'total_tests_per_thousand', 'new_tests_smoothed_per_thousand']
@@ -113,10 +155,10 @@ subheading = st.subheader("")
 # Render the deck.gl map in the Streamlit app as a Pydeck chart 
 map = st.pydeck_chart(r)
 
-# Update the maps and the subheading each day for 90 days
-for i in range(0, 120, 1):
-    # Increment day by 1
-    date += datetime.timedelta(days=1)
+# Update the maps and the subheading each day for from beginning to end
+for i in range(0, 820, 10):
+    # Increment day by 10
+    date += datetime.timedelta(days=10)
 
     # Update data in map layers
     covidLayer.data = df[df['date'] == date.isoformat()]
@@ -131,7 +173,7 @@ for i in range(0, 120, 1):
     subheading.subheader("%s on : %s" % (metric_to_show_in_covid_Layer, date.strftime("%B %d, %Y")))
     
     # wait 0.1 second before go onto next day
-    time.sleep(0.05)
+    time2.sleep(0.05)
 
 #################################################
 ### Plot 2: line chart ###
@@ -217,3 +259,10 @@ g2
 
 #################################################
 ### Plot 3: bar chart ###
+
+### Slider for selection of date range ###
+start_date, end_date = st.slider("Date", min(df['date']), max(df['date']), 
+    (datetime.date(2021, 1, 1), max(df['date'])), format="YYYY-MMM-DD")
+
+df = df[(df['date'] > start_date) & (df['date'] < end_date)]
+df["date"] = pd.to_datetime(df["date"])
