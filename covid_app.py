@@ -94,8 +94,8 @@ conditions = st.multiselect(
 
 ### Dropdown for Countries ###
 option_countries = [
-    'Isreal',
-    'Italy'
+    'Israel',
+    'Italy',
     'France',
     'United Kingdom',
     'United States',
@@ -123,8 +123,8 @@ option_countries = [
     'Guinea-Bissau'
 ]
 default_countries = [
-    'Isreal',
-    'Italy'
+    'Israel',
+    'Italy',
     'France',
     'United Kingdom',
     'United States',
