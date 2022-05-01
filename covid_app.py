@@ -161,9 +161,9 @@ df_g3_long = pd.melt(df_g3, id_vars=['location', 'date'], value_vars=g3_columns,
 
 bar_chart = alt.Chart(df_g3_long).mark_bar().encode(
     x=alt.X('values:Q', title="Normalized Values"),
-    y=alt.Y("conditions:N", title = None),
+    y=alt.Y("conditions:N", title = None, sort = g3_columns),
     color=alt.Color('conditions:N', title = "National Conditions & {}".format(selected_stat)),
-    row=alt.Row('location:N', title = "Country"),
+    row=alt.Row('location:N', title = "Country", sort = countries),
     tooltip = ["values"]
 ).properties(
     width=440,
