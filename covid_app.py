@@ -97,11 +97,6 @@ default_countries = [
     'United Kingdom',
     'United States',
     'China',
-    "Austria",
-    "Germany",
-    'Taiwan',
-    "Iceland",
-    "Spain",
 ]
 countries = st.multiselect(
     "Select Countries", options=df["location"].unique(), default=default_countries)
@@ -116,19 +111,29 @@ df_g3 = df_g3[df_g3["location"].isin(countries)]
 
 ### Graph 3: Bar chart across different countries ###
 # Header for G3
-st.write("National Conditions and Culmulative {} per Million People across Countries from 2020-01-01 to {}".format(selected_stat, selected_date))
+st.write("#### National Conditions and Culmulative {} per Million People across Countries from 2020-01-01 to {}".format(selected_stat, selected_date))
 
+g3_columns = conditions.copy()
 if selected_stat == "New Cases":
-    g3_columns = conditions.copy()
     g3_columns.append('total_cases_per_million')
+elif selected_stat == "Hospitalizations":
+    g3_columns.append('hosp_patients_per_million')
+elif selected_stat == "ICU Admissions":
+    g3_columns.append('icu_patients_per_million')
+else:
+    g3_columns.append('total_deaths_per_million')
 
-    bar_chart = alt.Chart(df_g3).mark_bar().encode(
-        x=alt.X("conditions:Q", stack=True, title="conditions"),
-        y=alt.Y("location"),
-    ).properties(
-        width=440,
-        title=f"barchart",
-    )
+# wide to long
+df_g3_long = pd.melt(df_g3, id_vars=['location', 'date'], value_vars=g3_columns, var_name = 'conditions', value_name='values')
 
+bar_chart = alt.Chart(df_g3_long).mark_bar().encode(
+    x=alt.X('values:Q', title="Normalized Values"),
+    y=alt.Y("conditions:N", title = None),
+    color=alt.Color('conditions:N', title = "National Conditions & {}".format(selected_stat)),
+    row=alt.Row('location:N', title = "Country"),
+    tooltip = ["values"]
+).properties(
+    width=440,
+)
 
 st.altair_chart(bar_chart, use_container_width=True)
