@@ -1,5 +1,5 @@
-from ssl import Options
-from turtle import title
+# from ssl import Options
+# from turtle import title
 import altair as alt
 import pandas as pd
 import streamlit as st
@@ -23,6 +23,10 @@ def load_data():
 
 # Uncomment the next line when finished
 df = load_data()
+df_norm = df.iloc[:, 4:]/df.iloc[:, 4:].max()
+df_norm.columns = [
+    str(df_norm) + '_norm' for df_norm in df_norm.columns]
+df_norm = pd.concat((df.iloc[:, :4], df_norm), 1)
 
 ### Radio selector for selection of COVID statistics ###
 cov_stats = [
@@ -60,11 +64,13 @@ selected_date = str(selected_date)
 df_g3 = df.loc[df['date'] == selected_date]
 #############
 
+# df_g3_norm = df_g3.iloc[:, 4:]/df_g3.iloc[:, 4:].max()
+df_g3_norm = df_norm.loc[df_norm['date'] == selected_date]
+
 
 ### Dropdown for National Conditions ###
 default_conditions = [
     'gdp_per_capita',
-    'people_vaccinated_per_hundred',
     'stringency_index'
 ]
 condition_options = [
@@ -93,44 +99,40 @@ conditions = st.multiselect(
 
 
 ### Dropdown for Countries ###
-option_countries = [
-    'Israel',
-    'Italy',
-    'France',
-    'United Kingdom',
-    'United States',
-    'China',
-    'Japan',
-    'South Korea',
-    "Austria",
-    "Germany",
-    "Spain",
-    'Australia',
-    'Central African Republic',
-    'Burundi',
-    'Liberia',
-    'Democratic Republic of Congo',
-    'Niger',
-    'Malawi',
-    'Mozambique',
-    'Sierra Leone',
-    'Comosros',
-    'Madagascar',
-    'Togo',
-    'Yemen',
-    'Yemen',
-    'Eritrea',
-    'Guinea-Bissau'
-]
+# option_countries = [
+#     'Israel',
+#     'Italy',
+#     'France',
+#     'United Kingdom',
+#     'United States',
+#     'Japan',
+#     'South Korea',
+#     "Austria",
+#     "Germany",
+#     "Spain",
+#     'Australia',
+#     'Central African Republic',
+#     'Burundi',
+#     'Liberia',
+#     'Democratic Republic of Congo',
+#     'Niger',
+#     'Malawi',
+#     'Mozambique',
+#     'Sierra Leone',
+#     'Comosros',
+#     'Madagascar',
+#     'Togo',
+#     'Yemen',
+#     'Eritrea',
+#     'Guinea-Bissau'
+# ]
 default_countries = [
-    'Israel',
+    'Japan',
+    'United Kingdom',
     'Italy',
     'France',
-    'United Kingdom',
-    'United States',
-    'China',
 ]
-covid_countries = df["location"].unique()
+option_countries = df["location"].unique()
 countries = st.multiselect(
     "Select Countries", options=option_countries, default=default_countries)
 
@@ -138,7 +140,7 @@ countries = st.multiselect(
 # df_g3 = df[df["date"] == '2022-04-26']
 
 df_g3 = df_g3[df_g3["location"].isin(countries)]
-
+df_g3_norm = df_g3_norm[df_g3_norm["location"].isin(countries)]
 #############
 
 
@@ -156,15 +158,24 @@ elif selected_stat == "ICU Admissions":
 else:
     g3_columns.append('total_deaths_per_million')
 
+g3_columns_norm = [
+    str(i) + '_norm' for i in g3_columns]
+
 # wide to long
-df_g3_long = pd.melt(df_g3, id_vars=['location', 'date'], value_vars=g3_columns, var_name = 'conditions', value_name='values')
+df_g3_long = pd.melt(df_g3, id_vars=[
+    'location', 'date'], value_vars=g3_columns, var_name='conditions', value_name='values')
+
+df_g3_norm_long = pd.melt(df_g3_norm, id_vars=[
+    'location', 'date'], value_vars=g3_columns_norm, var_name='conditions', value_name='values_norm')
+df_g3_long = pd.concat((df_g3_long, df_g3_norm_long.iloc[:, -1:]), 1)
 
 bar_chart = alt.Chart(df_g3_long).mark_bar().encode(
-    x=alt.X('values:Q', title="Normalized Values"),
-    y=alt.Y("conditions:N", title = None, sort = g3_columns),
-    color=alt.Color('conditions:N', title = "National Conditions & {}".format(selected_stat)),
-    row=alt.Row('location:N', title = "Country", sort = countries),
-    tooltip = ["values"]
+    x=alt.X('values_norm:Q', title="Normalized Values"),
+    y=alt.Y("conditions:N", title=None, sort=g3_columns),
+    color=alt.Color(
+        'conditions:N', title="National Conditions & {}".format(selected_stat)),
+    row=alt.Row('location:N', title="Country", sort=countries),
+    tooltip=["values:Q"]
 ).properties(
     width=440,
 )
