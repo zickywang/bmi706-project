@@ -28,8 +28,11 @@ df_norm.columns = [
     str(df_norm) + '_norm' for df_norm in df_norm.columns]
 df_norm = pd.concat((df.iloc[:, :4], df_norm), 1)
 
-st.write("# COVID Data Visualizer")
+# Headlines #
+st.write("# COVID-19 Data monitor")
+st.write("### Source: Our World in Data")
 
+### Plot 1: map ###
 
 ### Radio selector for selection of COVID statistics: G1, G2, G3 ###
 st.write("##### Select a COVID statistics for all visualizations below")
