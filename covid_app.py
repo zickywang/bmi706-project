@@ -4,6 +4,8 @@ import altair as alt
 import pandas as pd
 import streamlit as st
 import datetime
+import time
+import pydeck as pdk
 
 @st.cache
 def load_data():
@@ -49,13 +51,23 @@ selected_stat = st.radio("Covid Statistics", options=cov_stats)
 start_date, end_date = st.slider("Date", min(df['date']), max(df['date']), 
     (datetime.date(2020, 6, 1), datetime.date(2021, 12, 30)), format="YYYY-MMM-DD")
 
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!! merge date slider with G1 and G2
+
 df = df[(df['date'] > start_date) & (df['date'] < end_date)]
 df["date"] = pd.to_datetime(df["date"])
 
 ### SELECTBOX widgets
 st.write("THE map")
 
-metric_to_show_in_covid_Layer = cols 
+metric = None
+if selected_stat == "New Cases":
+    metric = 'total_cases_per_million'
+elif selected_stat == "Hospitalizations":
+    metric = 'hosp_patients_per_million'
+elif selected_stat == "ICU Admissions":
+    metric = 'icu_patients_per_million'
+else:
+    metric = 'total_deaths_per_million'
 
 #################################################
 ## MAP
@@ -79,7 +91,7 @@ covidLayer = pdk.Layer(
         radius_max_pixels=60,
         line_width_min_pixels=1,
         get_position=["Longitude", "Latitude"],
-        get_radius=metric_to_show_in_covid_Layer,
+        get_radius=metric,
         get_fill_color=[252, 136, 3],
         get_line_color=[255,0,0],
         tooltip="test test",
@@ -113,10 +125,10 @@ for i in range(0, 365, 1):
     map.pydeck_chart(r)
 
     # Update the heading with current date
-    subheading.subheader("%s on : %s" % (metric_to_show_in_covid_Layer, date.strftime("%B %d, %Y")))
+    subheading.subheader("%s on : %s" % (metric, date.strftime("%B %d, %Y")))
     
     # wait 0.1 second before go onto next day
-    time2.sleep(0.05)
+    time.sleep(0.05)
 
 
 ### Dropdown for Countries: G2 and G3 ###
