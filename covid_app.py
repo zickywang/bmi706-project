@@ -32,7 +32,7 @@ df_norm = pd.concat((df.iloc[:, :4], df_norm), 1)
 st.write("# COVID-19 Data monitor")
 st.write("### Source: Our World in Data")
 
-### Plot 1: map ###
+
 
 ### Radio selector for selection of COVID statistics: G1, G2, G3 ###
 st.write("##### Select a COVID statistics for all visualizations below")
@@ -46,6 +46,9 @@ cov_stats = [
 
 selected_stat = st.radio("Covid Statistics", options=cov_stats)
 #############
+
+### Plot 1: map ###
+
 
 
 ### Dropdown for Countries: G2 and G3 ###
