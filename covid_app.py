@@ -82,15 +82,15 @@ covidLayer = pdk.Layer(
         opacity=0.3,
         stroked=True,
         filled=True,
-        radius_scale=10,
-        radius_min_pixels=5,
-        radius_max_pixels=60,
+        radius_scale=5,
+        radius_min_pixels=1,
+        radius_max_pixels=100,
         line_width_min_pixels=1,
         get_position=["Longitude", "Latitude"],
         get_radius=metric,
         get_fill_color=[252, 136, 3],
         get_line_color=[255,0,0],
-        tooltip="test test",
+        tooltip=['location','population', metric],
     )
 
 # Create the deck.gl map
