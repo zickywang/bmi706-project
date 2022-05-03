@@ -10,7 +10,7 @@ import pydeck as pdk
 @st.cache
 def load_data():
     covid_df = pd.read_csv(
-        "https://covid.ourworldindata.org/data/owid-covid-data.csv")
+        "https://github.com/zickywang/bmi706-project/blob/main/covid_dataset.csv")
 
     covid_df['date'] = pd.to_datetime(covid_df['date'])
 
