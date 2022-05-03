@@ -5,7 +5,6 @@ import pandas as pd
 import streamlit as st
 import datetime
 
-
 @st.cache
 def load_data():
     covid_df = pd.read_csv(
@@ -20,7 +19,6 @@ def load_data():
 
     return covid_df
 
-
 # Load data and normalize data for G3
 df = load_data()
 df_norm = df.iloc[:, 4:]/df.iloc[:, 4:].max()
@@ -31,8 +29,6 @@ df_norm = pd.concat((df.iloc[:, :4], df_norm), 1)
 # Headlines #
 st.write("# COVID-19 Data monitor")
 st.write("### Source: Our World in Data")
-
-
 
 ### Radio selector for selection of COVID statistics: G1, G2, G3 ###
 st.write("##### Select a COVID statistics for all visualizations below")
@@ -48,7 +44,79 @@ selected_stat = st.radio("Covid Statistics", options=cov_stats)
 #############
 
 ### Plot 1: map ###
+### Slider for selection of date range ###
+# Note for ziqi and linzi, this is not the slider for a specific day
+start_date, end_date = st.slider("Date", min(df['date']), max(df['date']), 
+    (datetime.date(2020, 6, 1), datetime.date(2021, 12, 30)), format="YYYY-MMM-DD")
 
+df = df[(df['date'] > start_date) & (df['date'] < end_date)]
+df["date"] = pd.to_datetime(df["date"])
+
+### SELECTBOX widgets
+st.write("THE map")
+
+metric_to_show_in_covid_Layer = cols 
+
+#################################################
+## MAP
+
+# Variable for date picker, default to Jan 1st 2021
+date = datetime.date(2021,1,1)
+
+# Set viewport for the deckgl map
+view = pdk.ViewState(latitude=0, longitude=0, zoom=0.2,)
+
+# Create the scatter plot layer
+covidLayer = pdk.Layer(
+        "ScatterplotLayer",
+        data=df,
+        pickable=False,
+        opacity=0.3,
+        stroked=True,
+        filled=True,
+        radius_scale=10,
+        radius_min_pixels=5,
+        radius_max_pixels=60,
+        line_width_min_pixels=1,
+        get_position=["Longitude", "Latitude"],
+        get_radius=metric_to_show_in_covid_Layer,
+        get_fill_color=[252, 136, 3],
+        get_line_color=[255,0,0],
+        tooltip="test test",
+    )
+
+# Create the deck.gl map
+r = pdk.Deck(
+    layers=[covidLayer],
+    initial_view_state=view,
+    map_style="mapbox://styles/mapbox/light-v10",
+)
+
+# Create a subheading to display current date
+subheading = st.subheader("")
+
+# Render the deck.gl map in the Streamlit app as a Pydeck chart 
+map = st.pydeck_chart(r)
+
+# Update the maps and the subheading each day for from beginning to end
+for i in range(0, 365, 1):
+    # Increment day by 1
+    date += datetime.timedelta(days=1)
+
+    # Update data in map layers
+    covidLayer.data = df[df['date'] == date.isoformat()]
+
+    # Update the deck.gl map
+    r.update()
+
+    # Render the map
+    map.pydeck_chart(r)
+
+    # Update the heading with current date
+    subheading.subheader("%s on : %s" % (metric_to_show_in_covid_Layer, date.strftime("%B %d, %Y")))
+    
+    # wait 0.1 second before go onto next day
+    time2.sleep(0.05)
 
 
 ### Dropdown for Countries: G2 and G3 ###
@@ -66,7 +134,7 @@ countries = st.multiselect(
 
 ############### G2 ###############
 ### Slider for selection of date range: G2 ###
-start_date, end_date = st.slider("Select a range of date", min_value=min(df['date']), max_value=max(df['date']), value=[datetime.date(2021, 4, 1), datetime.date(2022, 1, 1)], format="YYYY-MMM-DD")
+start_date, end_date = st.slider("Select a range of date", min_value=datetime.date(2020, 6, 1), max_value=max(df['date']), value=[datetime.date(2021, 4, 1), datetime.date(2022, 1, 1)], format="YYYY-MMM-DD")
 start_date = str(start_date)
 end_date = str(end_date)
 df_g2 = df.loc[(df['date'] > start_date) & (df['date'] < end_date)]
@@ -163,7 +231,7 @@ st.write("#### National Conditions and Covid Statistics across Different Countri
 #############
 
 ### Slider for selection of date for culmulative data ###
-selected_date = st.slider("Select a date for culmulative statistics since 2020-01-01", min_value=min(df['date']), max_value=max(
+selected_date = st.slider("Select a date for culmulative statistics since 2020-01-01", min_value=datetime.date(2020, 6, 1), max_value=max(
     df['date']), value=datetime.date(2021, 1, 1), format="YYYY-MMM-DD")
 selected_date = str(selected_date)
 
