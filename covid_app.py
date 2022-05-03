@@ -47,14 +47,11 @@ selected_stat = st.radio("Covid Statistics", options=cov_stats)
 
 ### Plot 1: map ###
 ### Slider for selection of date range ###
-# Note for ziqi and linzi, this is not the slider for a specific day
-start_date, end_date = st.slider("Date", min(df['date']), max(df['date']), 
-    (datetime.date(2020, 6, 1), datetime.date(2021, 12, 30)), format="YYYY-MMM-DD")
-
-#!!!!!!!!!!!!!!!!!!!!!!!!!!!! merge date slider with G1 and G2
-
-df = df[(df['date'] > start_date) & (df['date'] < end_date)]
-df["date"] = pd.to_datetime(df["date"])
+### Slider for selection of date range: G1 and G2 ###
+start_date, end_date = st.slider("Select a range of date", min_value=datetime.date(2020, 6, 1), max_value=max(df['date'].dt.date), value=[datetime.date(2021, 4, 1), datetime.date(2022, 1, 1)], format="YYYY-MMM-DD")
+start_date = str(start_date)
+end_date = str(end_date)
+df_g2 = df.loc[(df['date'] > start_date) & (df['date'] < end_date)]
 
 ### SELECTBOX widgets
 st.write("THE map")
@@ -81,7 +78,7 @@ view = pdk.ViewState(latitude=0, longitude=0, zoom=0.2,)
 # Create the scatter plot layer
 covidLayer = pdk.Layer(
         "ScatterplotLayer",
-        data=df,
+        data=df_g2,
         pickable=False,
         opacity=0.3,
         stroked=True,
@@ -111,7 +108,7 @@ subheading = st.subheader("")
 map = st.pydeck_chart(r)
 
 # Update the maps and the subheading each day for from beginning to end
-for i in range(0, 365, 1):
+for i in range(0, 100, 1):
     # Increment day by 1
     date += datetime.timedelta(days=1)
 
@@ -125,6 +122,7 @@ for i in range(0, 365, 1):
     map.pydeck_chart(r)
 
     # Update the heading with current date
+    ######!!!!!!!! beautify
     subheading.subheader("%s on : %s" % (metric, date.strftime("%B %d, %Y")))
     
     # wait 0.1 second before go onto next day
@@ -145,11 +143,12 @@ countries = st.multiselect(
 
 
 ############### G2 ###############
-### Slider for selection of date range: G2 ###
-start_date, end_date = st.slider("Select a range of date", min_value=datetime.date(2020, 6, 1), max_value=max(df['date']), value=[datetime.date(2021, 4, 1), datetime.date(2022, 1, 1)], format="YYYY-MMM-DD")
-start_date = str(start_date)
-end_date = str(end_date)
-df_g2 = df.loc[(df['date'] > start_date) & (df['date'] < end_date)]
+# move to share with g1 and g2
+# ### Slider for selection of date range: G2 ###
+# start_date, end_date = st.slider("Select a range of date", min_value=datetime.date(2020, 6, 1), max_value=max(df['date']), value=[datetime.date(2021, 4, 1), datetime.date(2022, 1, 1)], format="YYYY-MMM-DD")
+# start_date = str(start_date)
+# end_date = str(end_date)
+# df_g2 = df.loc[(df['date'] > start_date) & (df['date'] < end_date)]
 #############
 
 # filter countries
@@ -244,7 +243,7 @@ st.write("#### National Conditions and Covid Statistics across Different Countri
 
 ### Slider for selection of date for culmulative data ###
 selected_date = st.slider("Select a date for culmulative statistics since 2020-01-01", min_value=datetime.date(2020, 6, 1), max_value=max(
-    df['date']), value=datetime.date(2021, 1, 1), format="YYYY-MMM-DD")
+    df['date'].dt.date), value=datetime.date(2021, 1, 1), format="YYYY-MMM-DD")
 selected_date = str(selected_date)
 
 df_g3 = df.loc[df['date'] == selected_date]
