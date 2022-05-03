@@ -142,7 +142,7 @@ default_countries = [
 ]
 option_countries = df["location"].unique()
 countries = st.multiselect(
-    "Select Countries for the line chart below", options=option_countries, default=default_countries)
+    "Select Countries for the line chart and bar chart below", options=option_countries, default=default_countries)
 ##############
 
 
