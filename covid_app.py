@@ -246,7 +246,7 @@ st.write("#### National Conditions and Covid Statistics across Different Countri
 #############
 
 ### Slider for selection of date for culmulative data ###
-selected_date = st.slider("Select a date for culmulative statistics since 2020-01-01", min_value=datetime.date(2020, 4, 1), max_value=max(
+selected_date = st.slider("Select a date for culmulative statistics since 2020-04-01", min_value=datetime.date(2020, 4, 1), max_value=max(
     df['date'].dt.date), value=datetime.date(2021, 1, 1), format="YYYY-MMM-DD")
 selected_date = str(selected_date)
 
@@ -333,7 +333,7 @@ df_g3_norm = df_g3_norm[df_g3_norm["location"].isin(countries)]
 
 
 # Header for G3
-st.write("##### National Conditions and Culmulative {} per Million People across Countries from 2020-01-01 to {}".format(selected_stat, selected_date))
+st.write("##### National Conditions and Culmulative {} per Million People across Countries from 2020-04-01 to {}".format(selected_stat, selected_date))
 
 g3_columns = conditions.copy()
 if selected_stat == "New Cases":
