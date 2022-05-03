@@ -47,7 +47,7 @@ selected_stat = st.radio("Covid Statistics", options=cov_stats)
 ### Plot 1: map ###
 ### Slider for selection of date range ###
 ### Slider for selection of date range: G1 and G2 ###
-start_date, end_date = st.slider("Select a range of date for the first two visualizations", min_value=datetime.date(2020, 4, 1), max_value=max(df['date'].dt.date), value=[datetime.date(2020, 6, 1), datetime.date(2021, 1, 1)], format="YYYY-MMM-DD")
+start_date, end_date = st.slider("Select a range of date for the first two visualizations", min_value=datetime.date(2020, 4, 1), max_value=max(df['date'].dt.date), value=[datetime.date(2020, 8, 1), datetime.date(2021, 1, 1)], format="YYYY-MMM-DD")
 start_datestr = str(start_date)
 end_datestr = str(end_date)
 df_g2 = df.loc[(df['date'] > start_datestr) & (df['date'] < end_datestr)]
