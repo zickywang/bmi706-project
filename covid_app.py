@@ -9,8 +9,7 @@ import pydeck as pdk
 
 @st.cache
 def load_data():
-    covid_df = pd.read_csv(
-        "https://github.com/zickywang/bmi706-project/blob/main/covid_dataset.csv")
+    covid_df = pd.read_csv("covid_dataset.csv")
 
     covid_df['date'] = pd.to_datetime(covid_df['date'])
 
@@ -26,7 +25,7 @@ df = load_data()
 df_norm = df.iloc[:, 4:]/df.iloc[:, 4:].max()
 df_norm.columns = [
     str(df_norm) + '_norm' for df_norm in df_norm.columns]
-df_norm = pd.concat((df.iloc[:, :4], df_norm), 1)
+df_norm = pd.concat((df.iloc[:,  :4], df_norm), 1)
 
 # Headlines #
 st.write("# COVID-19 Data monitor")
@@ -48,13 +47,10 @@ selected_stat = st.radio("Covid Statistics", options=cov_stats)
 ### Plot 1: map ###
 ### Slider for selection of date range ###
 ### Slider for selection of date range: G1 and G2 ###
-start_date, end_date = st.slider("Select a range of date", min_value=datetime.date(2020, 6, 1), max_value=max(df['date'].dt.date), value=[datetime.date(2021, 4, 1), datetime.date(2022, 1, 1)], format="YYYY-MMM-DD")
-start_date = str(start_date)
-end_date = str(end_date)
-df_g2 = df.loc[(df['date'] > start_date) & (df['date'] < end_date)]
-
-### SELECTBOX widgets
-st.write("THE map")
+start_date, end_date = st.slider("######Select a range of date for the first two visualizations", min_value=datetime.date(2020, 4, 1), max_value=max(df['date'].dt.date), value=[datetime.date(2020, 6, 1), datetime.date(2021, 1, 1)], format="YYYY-MMM-DD")
+start_datestr = str(start_date)
+end_datestr = str(end_date)
+df_g2 = df.loc[(df['date'] > start_datestr) & (df['date'] < end_datestr)]
 
 metric = None
 if selected_stat == "New Cases":
@@ -69,8 +65,11 @@ else:
 #################################################
 ## MAP
 
-# Variable for date picker, default to Jan 1st 2021
-date = datetime.date(2021,1,1)
+# Variable for date picker
+date = start_date
+dayrange = end_date-start_date
+dayrange = dayrange.days
+
 
 # Set viewport for the deckgl map
 view = pdk.ViewState(latitude=0, longitude=0, zoom=0.2,)
@@ -107,26 +106,31 @@ subheading = st.subheader("")
 # Render the deck.gl map in the Streamlit app as a Pydeck chart 
 map = st.pydeck_chart(r)
 
-# Update the maps and the subheading each day for from beginning to end
-for i in range(0, 100, 1):
-    # Increment day by 1
-    date += datetime.timedelta(days=1)
+# the heading with current date
+metric = metric.replace("_", " ")
+subheading.subheader("World Map of %s on : %s" % (metric, date.strftime("%B %d, %Y")))
+play = st.checkbox("Play THE MAP!")
+if play:
+    # Update the maps and the subheading each day for from beginning to end
+    for i in range(0, dayrange, 1):
+        # Increment day by 1
+        date += datetime.timedelta(days=1)
 
-    # Update data in map layers
-    covidLayer.data = df[df['date'] == date.isoformat()]
+        # Update data in map layers
+        covidLayer.data = df[df['date'] == date.isoformat()]
 
-    # Update the deck.gl map
-    r.update()
+        # Update the deck.gl map
+        r.update()
 
-    # Render the map
-    map.pydeck_chart(r)
+        # Render the map
+        map.pydeck_chart(r)
 
-    # Update the heading with current date
-    ######!!!!!!!! beautify
-    subheading.subheader("%s on : %s" % (metric, date.strftime("%B %d, %Y")))
-    
-    # wait 0.1 second before go onto next day
-    time.sleep(0.05)
+        # Update the heading with current date
+        metric = metric.replace("_", " ")
+        subheading.subheader("%s on : %s" % (metric, date.strftime("%B %d, %Y")))
+        
+        # wait 0.1 second before go onto next day
+        time.sleep(0.05)
 
 
 ### Dropdown for Countries: G2 and G3 ###
@@ -138,7 +142,7 @@ default_countries = [
 ]
 option_countries = df["location"].unique()
 countries = st.multiselect(
-    "Select Countries", options=option_countries, default=default_countries)
+    "Select Countries for the line chart below", options=option_countries, default=default_countries)
 ##############
 
 
@@ -242,7 +246,7 @@ st.write("#### National Conditions and Covid Statistics across Different Countri
 #############
 
 ### Slider for selection of date for culmulative data ###
-selected_date = st.slider("Select a date for culmulative statistics since 2020-01-01", min_value=datetime.date(2020, 6, 1), max_value=max(
+selected_date = st.slider("Select a date for culmulative statistics since 2020-01-01", min_value=datetime.date(2020, 4, 1), max_value=max(
     df['date'].dt.date), value=datetime.date(2021, 1, 1), format="YYYY-MMM-DD")
 selected_date = str(selected_date)
 
@@ -278,7 +282,7 @@ condition_options = [
     'human_development_index',
 ]
 conditions = st.multiselect(
-    "Select National Conditions", options=condition_options, default=default_conditions)
+    "Select National Conditions you would like to compare", options=condition_options, default=default_conditions)
 
 #############
 
@@ -329,7 +333,7 @@ df_g3_norm = df_g3_norm[df_g3_norm["location"].isin(countries)]
 
 
 # Header for G3
-st.write("#### National Conditions and Culmulative {} per Million People across Countries from 2020-01-01 to {}".format(selected_stat, selected_date))
+st.write("##### National Conditions and Culmulative {} per Million People across Countries from 2020-01-01 to {}".format(selected_stat, selected_date))
 
 g3_columns = conditions.copy()
 if selected_stat == "New Cases":
